@@ -1,0 +1,95 @@
+# integral family configuration
+integralfamily: 
+  # integral family name
+  name: banana
+  # loop momenta
+  internals: [l1, l2, l3]
+  # independent external momenta
+  externals: [p]
+  # kinematic invariants
+  # format: - [variable, dimension]
+  kinematic_invariants:
+    - [s, 2]
+    - [m1, 1]
+    - [m2, 1]
+    - [m3, 1]
+    - [m4, 1]
+  # propagators
+  # format: - [momentum, squared_mass]
+  propagators:
+    - [l1, m1^2]
+    - [l2, m2^2]
+    - [l3, m3^2]
+    - [p+l1+l2+l3, m4^2]
+    - [l1-l2, 0]
+    - [l2-l3, 0]
+    - [l3-l1, 0]
+    - [l1-p, 0]
+    - [l2-p, 0]
+  # scalar product rules
+  # format: - [[momentum1, momentum2], expression]
+  # symbols in expression must be contained in kinematic invariants
+  scalarproduct_rules: 
+    - [[p, p], s]
+  # [optional] top level sector
+  top_level_sector: 15
+# base directory of Kira reduction result
+#   - this directory should contain subdirectories
+#   - /config, /results and /sectormappings
+kiradir: /root/banana
+# Kira reduction result file name
+#   - this file should be under ${kiradir}/results/${integralfamily}
+kirafile: kira_banana.m
+# numeric values for kinematic invariants
+kinematics_numerics:
+  - [m1, sqrt(2)]
+  - [m2, sqrt(3/2)]
+  - [m3, sqrt(4/3)]
+  - [m4, 1]
+  - [s, 2]
+# target spacetime dimension
+d0: 2
+# minimum positive index sum for integrals of interest
+#   - please ensure that 2t > L * d0
+#   - where L is number of loops
+t: 4
+# epsilon expansion order
+#   - please enter an even integer
+eps_order: 2
+# known values for master integrals
+# format: - [[list of indices], expression]
+master_values:
+  - [[0, 2, 2, 2, 0, 0, 0, 0, 0], tgamma(2-d/2)^3*(m2*m3*m4)^(d-4)/tgamma(4-3*d/2)]
+  - [[2, 0, 2, 2, 0, 0, 0, 0, 0], tgamma(2-d/2)^3*(m1*m3*m4)^(d-4)/tgamma(4-3*d/2)]
+  - [[2, 2, 0, 2, 0, 0, 0, 0, 0], tgamma(2-d/2)^3*(m2*m1*m4)^(d-4)/tgamma(4-3*d/2)]
+  - [[2, 2, 2, 0, 0, 0, 0, 0, 0], tgamma(2-d/2)^3*(m2*m3*m1)^(d-4)/tgamma(4-3*d/2)]
+# custom parameters for SDPA
+sdpa_params:
+  # maxIteration (unsigned int)
+  maxIteration: 100
+  # epsilonStar (double, > 0.0) 
+  epsilonStar: 1.0e-7
+  # epsilonDash (double, > 0.0)
+  epsilonDash: 1.0e-7
+  # lambdaStar (double, > 0.0)
+  lambdaStar: 1.0e+2
+  # omegaStar (double, > 1.0)
+  omegaStar: 2.0
+  # lowerBound (double)
+  lowerBound: -1.0e+5
+  # upperBound (double)
+  upperBound: 1.0e+5
+  # betaStar (double, >= 0.0 and < 1.0)
+  betaStar: 0.1
+  # betaBar (double, >= 0.0 and < 1.0 and >= betaStar)
+  betaBar: 0.2
+  # gammaStar (double, > 0.0 and < 1.0)
+  gammaStar: 0.9
+# polynomial ansatze
+# format: - [prefactor, min_x_degree, max_x_degree, max_log_degree]
+ansatze:
+  - [x0, 1, 5, 1]
+  - [x1, 1, 5, 1]
+  - [x2, 1, 5, 1]
+  - [x3, 1, 5, 1]
+

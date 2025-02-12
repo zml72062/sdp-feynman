@@ -1,0 +1,55 @@
+# integral family configuration
+integralfamily:
+  # integral family name
+  name: bubble
+  # loop momenta
+  internals: [l]
+  # independent external momenta
+  externals: [p]
+  # kinematic invariants
+  # format: - [variable, dimension]
+  kinematic_invariants:
+    - [s, 2]
+    - [m, 1]
+  # propagators
+  # format: - [momentum, squared_mass]
+  propagators:
+    - [l, m^2]
+    - [l+p, m^2]
+  # scalar product rules
+  # format: - [[momentum1, momentum2], expression]
+  # symbols in expression must be contained in kinematic invariants
+  scalarproduct_rules:
+    - [[p, p], s]
+# base directory of Kira reduction result
+#   - this directory should contain subdirectories
+#   - /config, /results and /sectormappings
+kiradir: /root/bubble
+# Kira reduction result file name
+#   - this file should be under ${kiradir}/results/${integralfamily}
+kirafile: kira_bubble.m
+# numeric values for kinematic invariants
+kinematics_numerics:
+  - [s, 2]
+  - [m, 1]
+# target spacetime dimension
+d0: 4
+# minimum positive index sum for integrals of interest
+#   - please ensure that 2t > L * d0
+#   - where L is number of loops
+t: 3
+# epsilon expansion order
+#   - please enter an even integer
+eps_order: 2
+# known values for master integrals
+# format: - [[list of indices], expression]
+master_values:
+  - [[3, 0], 1] # Let's use I[3, 0] as a reference point
+# custom parameters for SDPA
+sdpa_params:
+  max_iteration: 100
+# polynomial ansatze
+# format: - [prefactor, min_x_degree, max_x_degree, max_log_degree]
+ansatze:
+  - [x0, 0, 5, 1]
+  - [x1, 0, 5, 1]
