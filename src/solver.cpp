@@ -27,14 +27,16 @@ void master_solver::solve_from(const std::vector<GiNaC::matrix>& matrices) {
     }
     for (int i = 0; i < num_integrals; i++) {
         coefficients.push_back(std::vector<GiNaC::matrix>(num_blocks));
+        bool zero = true;
         for (int j = 0; j < num_blocks; j++) {
             coefficients.back()[j] = GiNaC::ex_to<GiNaC::matrix>(
                 matrices[j].diff(GiNaC::ex_to<GiNaC::symbol>(variables_to_solve[i]))
                            .subs(zero_rules, GiNaC::subs_options::algebraic)
             );
-            if (all_zero(coefficients.back()[j])) {
-                std::cerr << "Warning: " << variables_to_solve[i] << " cannot be determined" << std::endl;
-            }
+            zero &= all_zero(coefficients.back()[j]);
+        }
+        if (zero) {
+            std::cerr << "Warning: " << variables_to_solve[i] << " cannot be determined" << std::endl;
         }
     }
     for (int j = 0; j < num_blocks; j++) {

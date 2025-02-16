@@ -16,6 +16,8 @@ std::string combine(const std::vector<int>& values);
 
 bool has_non_null_key(const YAML::Node& node, const std::string& key);
 
+double to_double(const GiNaC::ex& ex);
+
 GiNaC::matrix adjugate(const GiNaC::matrix& M);
 
 // randomly generate Feynman parameters (x_1, ..., x_n)

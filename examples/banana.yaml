@@ -88,8 +88,8 @@ sdpa_params:
 # polynomial ansatze
 # format: - [prefactor, min_x_degree, max_x_degree, max_log_degree]
 ansatze:
-  - [x0, 1, 5, 1]
-  - [x1, 1, 5, 1]
-  - [x2, 1, 5, 1]
-  - [x3, 1, 5, 1]
+  - [x0, 0, 5, 1]
+  - [x1, 0, 5, 1]
+  - [x2, 0, 5, 1]
+  - [x3, 0, 5, 1]
 

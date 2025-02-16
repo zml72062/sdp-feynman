@@ -78,7 +78,7 @@ sdpa_interface::sdpa_interface(const std::vector<std::vector<GiNaC::matrix>>& co
                 auto element = bias[j](k, l);
                 double value = 0.0;
                 try {
-                    value = -GiNaC::ex_to<GiNaC::numeric>(element).to_double();
+                    value = -to_double(element);
                 } catch (...) {
                     std::cerr << element << " is not a numeric value!" << std::endl;
                     fail = true;
@@ -96,7 +96,7 @@ sdpa_interface::sdpa_interface(const std::vector<std::vector<GiNaC::matrix>>& co
                     auto element = coefficients[i][j](k, l);
                     double value = 0.0;
                     try {
-                        value = GiNaC::ex_to<GiNaC::numeric>(element).to_double();
+                        value = to_double(element);
                     } catch (...) {
                         std::cerr << element << " is not a numeric value!" << std::endl;
                         fail = true;

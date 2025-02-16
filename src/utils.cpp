@@ -29,6 +29,10 @@ bool has_non_null_key(const YAML::Node& node, const std::string& key) {
     return node_map.find(key) != node_map.end() && node[key].Type() != YAML::NodeType::Null;
 }
 
+double to_double(const GiNaC::ex& ex) {
+    return GiNaC::ex_to<GiNaC::numeric>(GiNaC::ex_to<GiNaC::numeric>(ex).evalf()).to_double();
+}
+
 GiNaC::matrix adjugate(const GiNaC::matrix& M) {
     auto n = M.rows(), m = M.cols();
     if (n != m)

@@ -204,8 +204,10 @@ bool config_parser::check_euclidean(unsigned long seed, int trials) {
         GiNaC::lst rules;
         for (int j = 0; j < n; j++)
             rules.append(feynman_params[effective_feynman_params[j]] == random_instance[j]);
-        auto evaluated_F = GiNaC::ex_to<GiNaC::numeric>(numeric_F.subs(rules, GiNaC::subs_options::algebraic)).evalf();
-        if (!GiNaC::is_a<GiNaC::numeric>(evaluated_F)) {
+        double evaluated_F = 0;
+        try {
+            evaluated_F = to_double(numeric_F.subs(rules, GiNaC::subs_options::algebraic));
+        } catch (...) {
             std::cerr << "Incomplete numerics for kinematics!" << std::endl;
             return false;
         }
@@ -213,8 +215,8 @@ bool config_parser::check_euclidean(unsigned long seed, int trials) {
             std::cerr << std::endl << "Euclidean check failed!" << std::endl;
             return false;
         }
-        auto evaluated_U = GiNaC::ex_to<GiNaC::numeric>(symanzik_U.subs(rules, GiNaC::subs_options::algebraic)).evalf();
-        double value = GiNaC::ex_to<GiNaC::numeric>(GiNaC::pow(evaluated_U, num_internals + 1) / GiNaC::pow(evaluated_F, num_internals)).to_double();
+        double evaluated_U = to_double(symanzik_U.subs(rules, GiNaC::subs_options::algebraic));
+        double value = std::pow(evaluated_U, num_internals + 1) / std::pow(evaluated_F, num_internals);
         if (value > max_log_value) {
             max_log_value = value;
             max_log_point = random_instance;
