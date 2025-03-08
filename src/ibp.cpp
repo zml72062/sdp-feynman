@@ -33,6 +33,7 @@ static std::pair<bool, GiNaC::ex> get_prefactor(const std::string& id, int t, in
 }
 
 void config_parser::read_ibps() {
+    count_ibps();
     std::ifstream ibp_result_file(ibp_result_filename);
     std::string ibp, current_key;
     std::size_t _asterisk, counter = 0;
@@ -57,7 +58,7 @@ void config_parser::read_ibps() {
                     continue;
                 get(integral_table, current_key, "I[", "]");
                 ibp_table[current_key] = 0;
-                std::cerr << "Processing the " << counter << "-th IBP relation" << "\r";
+                std::cerr << "Processing the " << counter << "-th / " << ibp_count << " IBP relation" << "\r";
             } else if (!fail) { // an IBP body
                 auto current_integral = get(integral_table, int_to_id(ibp), "I[", "]")
                     .subs(master_values, GiNaC::subs_options::algebraic)
@@ -110,7 +111,9 @@ void config_parser::expand_ibps(int order) {
     }
     // generate IBP equations at different order
     numeric_ibp_table = std::vector<GiNaC::symtab>(order + 1);
+    int num_effective_ibps = ibp_table.size(), counter = 0;
     for (auto& key_value: ibp_table) {
+        std::cerr << "Processing the " << ++counter << "-th / " << num_effective_ibps << " IBP relation" << "\r";
         auto full = key_value.second.subs(rules, GiNaC::subs_options::algebraic);
         GiNaC::lst derivatives;
         int fail = 0;
@@ -131,6 +134,8 @@ void config_parser::expand_ibps(int order) {
         }
     }
     END_TIME(expand_ibp);
+    
+    std::cerr << std::endl << "Done!" << std::endl;
     PRINT_TIME(expand_ibp);
 }
 
@@ -138,18 +143,34 @@ void config_parser::expand_ibps() {
     expand_ibps(eps_order);
 }
 
-void config_parser::print_raw_ibps() {
+void config_parser::count_ibps() {
+    std::ifstream ibp_result_file(ibp_result_filename);
+    std::string ibp;
+    int counter = 0;
+    while (true) {
+        ibp_result_file >> ibp;
+        if (ibp_result_file.eof())
+            break;
+        if (ibp.find(integral_family) != std::string::npos
+         && ibp.find('*') == std::string::npos)
+            counter++;
+    }
+    ibp_result_file.close();
+    ibp_count = counter;
+}
+
+void config_parser::dump_raw_ibps(std::ostream& out) {
     for (auto& ibp: ibp_table) {
-        std::cout << integral_table[ibp.first] << " = " << ibp.second << std::endl;
+        out << integral_table[ibp.first] << " = " << ibp.second << std::endl;
     }
 }
 
-void config_parser::print_expanded_ibps() {
+void config_parser::dump_expanded_ibps(std::ostream& out) {
     int order_ = numeric_integral_table.size();
     for (int i = 0; i < order_; i++) {
         for (auto& ibp: numeric_ibp_table[i]) {
-            std::cout << numeric_integral_table[i][ibp.first] << " = "
-                      << ibp.second << std::endl;
+            out << numeric_integral_table[i][ibp.first] << " = "
+                << ibp.second << std::endl;
         }
     }
 }

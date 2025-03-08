@@ -16,6 +16,15 @@ followed by
 ```
 to launch master integral evaluation. Please check `examples/` subdirectory for configure file format.
 
+The dependencies `gsl` and `sdpa` are optional. Without `gsl`, the Euclidean region check is disabled. To compile without `gsl`, run
+```sh
+make NO_GSL=true
+```
+Without `sdpa`, the program cannot actually evaluate master integrals. Instead, it outputs a semi-definite program in plain text. The output format is compatible with `sdpa`, so that one may process it later with an external `sdpa` solver to get the values of master integrals. To compile without `sdpa`, run
+```sh
+make NO_SDPA_LIB=true
+```
+
 ## Prerequisites
 
 The "Instructions" sections are tested on Ubuntu 22.04 LTS.
@@ -44,9 +53,9 @@ The "Instructions" sections are tested on Ubuntu 22.04 LTS.
         ```
         and check `README.rst` for installation instructions.
 
-- **GSL (GNU Scientific Library) 2.8** (https://www.gnu.org/software/gsl/)
+- **GSL (GNU Scientific Library) 2.8 (optional)** (https://www.gnu.org/software/gsl/)
 
-- **SDPA 7.3.15** (https://sdpa.sourceforge.net/)
+- **SDPA 7.3.15 (optional)** (https://sdpa.sourceforge.net/)
     - **Instructions:** The binary version of SDPA can be installed by `apt-get`,
         ```sh
         # To install SDPA,

@@ -14,6 +14,8 @@ public:
      * @param _config_file_name YAML config file name
      */
     config_parser(const char* _config_file_name);
+
+#ifndef NO_GSL
     /**
      * Check whether the given kinematics lies in the Euclidean region.
      * Numerics for *all* kinematics should be given in YAML config file.
@@ -21,13 +23,14 @@ public:
      * @param trials number of trials
      */
     bool check_euclidean(unsigned long seed = 0, int trials = 65536);
+#endif // NO_GSL
 
     // IBP related methods
     void read_ibps();
     void expand_ibps(int order);
     void expand_ibps();
-    void print_raw_ibps();
-    void print_expanded_ibps();
+    void dump_raw_ibps(std::ostream& out);
+    void dump_expanded_ibps(std::ostream& out);
 
     // Export internal data to a polynomial parser.
     polynomial_parser get_polynomial_parser() {
@@ -42,7 +45,7 @@ public:
     master_solver get_solver() {
         return master_solver(effective_master_table,
                              numeric_integral_table,
-                             config_file);
+                             config_file, will_dump_symbolic_sdp);
     }
 
     const std::string& family_name() {
@@ -56,6 +59,12 @@ public:
     const GiNaC::ex& F() {
         return symanzik_F;
     }
+
+    // Options
+    bool will_check_euclidean;
+    bool will_dump_raw_ibps;
+    bool will_dump_expanded_ibps;
+    bool will_dump_symbolic_sdp;
 private:
     YAML::Node config_file;
     // name of the family of integrals
@@ -90,6 +99,7 @@ private:
     double min_log_value;
     double max_log_value;
 
+    int ibp_count;
     int d0;
     int t;
     int eps_order;
@@ -107,6 +117,7 @@ private:
     void read_masters();
     void compute_symanzik();
     void read_master_values();
+    void count_ibps();
 
     GiNaC::ex get(GiNaC::symtab& _table, const std::string& _key,
                   const std::string& _prefix = "", 
@@ -130,4 +141,4 @@ private:
 };
 
 
-#endif 
+#endif // CONFIG_HPP

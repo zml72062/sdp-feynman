@@ -63,13 +63,19 @@ std::vector<GiNaC::matrix> polynomial_generator::generate_from_config() {
     std::vector<GiNaC::matrix> results;
     for (auto& ansatz: ansatze) {
         auto parts = ansatz.as<std::vector<YAML::Node>>();
-        // [prefactor, min_x_degree, max_x_degree, max_log_degree]
-        auto prefactor = parts[0].as<std::string>();
-        auto min_x_degree = parts[1].as<int>();
-        auto max_x_degree = parts[2].as<int>();
-        auto max_log_degree = parts[3].as<int>();
-
-        results.push_back(generate(prefactor, min_x_degree, max_x_degree, max_log_degree));
+        if (parts.size() == 4) {
+            // [prefactor, min_x_degree, max_x_degree, max_log_degree]
+            auto prefactor = parts[0].as<std::string>();
+            auto min_x_degree = parts[1].as<int>();
+            auto max_x_degree = parts[2].as<int>();
+            auto max_log_degree = parts[3].as<int>();
+            results.push_back(generate(prefactor, min_x_degree, max_x_degree, max_log_degree));
+        } else if (parts.size() == 2) {
+            // [prefactor, [terms]]
+            auto prefactor = parts[0].as<std::string>();
+            auto terms = parts[1].as<std::vector<std::string>>();
+            results.push_back(generate(prefactor, terms));
+        }
     }
 
     return results;

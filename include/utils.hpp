@@ -3,7 +3,9 @@
 
 #include <yaml-cpp/yaml.h>
 #include <ginac/ginac.h>
+#ifndef NO_GSL
 #include <gsl/gsl_rng.h>
+#endif // NO_GSL
 #include <chrono>
 
 #define START_TIME(description) auto description##_begin = std::chrono::high_resolution_clock::now()
@@ -20,6 +22,7 @@ double to_double(const GiNaC::ex& ex);
 
 GiNaC::matrix adjugate(const GiNaC::matrix& M);
 
+#ifndef NO_GSL
 // randomly generate Feynman parameters (x_1, ..., x_n)
 // that are uniformly drawn from region 
 // 0 <= x_i <= 1, x_1 + ... + x_n = 1
@@ -33,6 +36,7 @@ private:
     std::vector<double> alpha;
     gsl_rng* rng;
 };
+#endif // NO_GSL
 
 // correctly iterate over polynomial terms
 class polynomial_iterator {
@@ -50,4 +54,4 @@ private:
     GiNaC::const_iterator end_;
 };
 
-#endif
+#endif // UTILS_HPP

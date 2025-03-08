@@ -15,6 +15,22 @@ config_parser::config_parser(const char* _config_file_name) {
     t = config_file["t"].as<int>();
     d0 = config_file["d0"].as<int>();
     eps_order = config_file["eps_order"].as<int>();
+
+    will_check_euclidean = true;
+    will_dump_raw_ibps = false;
+    will_dump_expanded_ibps = false;
+    will_dump_symbolic_sdp = false;
+    if (has_non_null_key(config_file, "options")) {
+        auto options = config_file["options"].as<YAML::Node>();
+        if (has_non_null_key(options, "check_euclidean"))
+            will_check_euclidean = options["check_euclidean"].as<bool>();
+        if (has_non_null_key(options, "dump_raw_ibps"))
+            will_dump_raw_ibps = options["dump_raw_ibps"].as<bool>();
+        if (has_non_null_key(options, "dump_expanded_ibps"))
+            will_dump_expanded_ibps = options["dump_expanded_ibps"].as<bool>();
+        if (has_non_null_key(options, "dump_symbolic_sdp"))
+            will_dump_symbolic_sdp = options["dump_symbolic_sdp"].as<bool>();
+    }
     
     read_internals();
     read_externals();
@@ -190,6 +206,7 @@ void config_parser::read_master_values() {
     }
 }
 
+#ifndef NO_GSL
 bool config_parser::check_euclidean(unsigned long seed, int trials) {
     std::cerr << "Euclidean checks start..." << std::endl;
     START_TIME(check);
@@ -244,4 +261,5 @@ bool config_parser::check_euclidean(unsigned long seed, int trials) {
     std::cout << min_rule << std::endl;
     return true;
 }
+#endif // NO_GSL
 

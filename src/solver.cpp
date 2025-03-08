@@ -1,6 +1,8 @@
 #include "solver.hpp"
 #include "sdpa.hpp"
 #include "utils.hpp"
+#include <fstream>
+#include <filesystem>
 
 static bool all_zero(const GiNaC::matrix& matrix) {
     int r = matrix.rows(), c = matrix.cols();
@@ -48,15 +50,24 @@ void master_solver::solve_from(const std::vector<GiNaC::matrix>& matrices) {
 
     // instantiate an SDPA solver
     sdpa_interface solve(coefficients, bias, *configp);
-    solve.solve();
-    END_TIME(solve);
-    PRINT_TIME(solve);
-
     if (solve.get_fail()) {
         fail = true;
         std::cerr << "SDPA failed at initialization!" << std::endl;
         return;
     }
+
+    if (will_dump) {
+        std::cerr << "Dumping symbolic SDP ..." << std::endl;
+        std::filesystem::create_directory("logs");
+        std::ofstream sdp_out(std::filesystem::path("logs").append("symbolic_sdp"));
+        solve.dump(sdp_out);
+        sdp_out.close();
+    }
+    solve.solve();
+    END_TIME(solve);
+    PRINT_TIME(solve);
+
+#ifndef NO_SDPA_LIB
     auto& result = solve.get_result();
     if (result.phase != SDPA::PhaseType::pdOPT) {
         fail = true;
@@ -77,4 +88,5 @@ void master_solver::solve_from(const std::vector<GiNaC::matrix>& matrices) {
         computed_values.append(variables_to_solve[i] == result_vec[i]);
     }
     fail = false;
+#endif // NO_SDPA_LIB
 }

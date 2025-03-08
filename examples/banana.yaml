@@ -87,9 +87,20 @@ sdpa_params:
   gammaStar: 0.9
 # polynomial ansatze
 # format: - [prefactor, min_x_degree, max_x_degree, max_log_degree]
+#      or - [prefactor, [terms]]
 ansatze:
   - [x0, 0, 5, 1]
   - [x1, 0, 5, 1]
   - [x2, 0, 5, 1]
   - [x3, 0, 5, 1]
+# options
+options:
+  # check whether the kinematics lies in Euclidean region (default true)
+  check_euclidean: false
+  # dump raw IBP relations (default false)
+  dump_raw_ibps: false
+  # dump epsilon expansions of IBP relations (default false)
+  dump_expanded_ibps: false
+  # dump semidefinite programming problem in symbolic form (default false)
+  dump_symbolic_sdp: false
 

@@ -1,10 +1,27 @@
+NO_SDPA_LIB = false
+
 SRCDIR    = src
 INCDIR    = include
 OBJDIR    = build
 CXX       = g++
+
 CPPFLAGS  = -I./${INCDIR}
+ifeq (${NO_SDPA_LIB}, true)
+CPPFLAGS  += -DNO_SDPA_LIB
+endif
+ifeq (${NO_GSL}, true)
+CPPFLAGS  += -DNO_GSL
+endif
+
 CXXFLAGS  = -O2
-LDFLAGS   = -lyaml-cpp -lcln -lginac -lgsl -lgslcblas -lsdpa -ldmumps_seq -llapack -lblas
+
+LDFLAGS   = -lyaml-cpp -lcln -lginac
+ifneq (${NO_SDPA_LIB}, true)
+LDFLAGS   += -lsdpa -ldmumps_seq -llapack -lblas
+endif
+ifneq (${NO_GSL}, true)
+LDFLAGS   += -lgsl -lgslcblas
+endif
 
 OBJS      = ${OBJDIR}/config.o \
 			${OBJDIR}/utils.o \

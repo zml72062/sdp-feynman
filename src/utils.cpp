@@ -1,4 +1,6 @@
+#ifndef NO_GSL
 #include <gsl/gsl_randist.h>
+#endif // NO_GSL
 #include "utils.hpp"
 
 std::vector<int> split(const char* str) {
@@ -56,6 +58,8 @@ GiNaC::matrix adjugate(const GiNaC::matrix& M) {
     return adj;
 }
 
+#ifndef NO_GSL
+
 random_feynman_params::random_feynman_params(int n, unsigned long seed) : length(n), alpha(n, 1.0) {
     gsl_rng_env_setup();
     rng = gsl_rng_alloc(gsl_rng_default);
@@ -69,6 +73,8 @@ random_feynman_params::~random_feynman_params() {
 void random_feynman_params::operator()(std::vector<double>& slots) {
     gsl_ran_dirichlet(rng, length, alpha.data(), slots.data());
 }
+
+#endif // NO_GSL
 
 polynomial_iterator::polynomial_iterator(const GiNaC::ex& polynomial)
     : polynomialp(&polynomial) {
