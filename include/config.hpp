@@ -3,6 +3,8 @@
 
 #include <yaml-cpp/yaml.h>
 #include <ginac/ginac.h>
+#include <sys/types.h>
+#include <unistd.h>
 #include "parse.hpp"
 #include "solver.hpp"
 
@@ -118,6 +120,20 @@ private:
     void compute_symanzik();
     void read_master_values();
     void count_ibps();
+
+    // cache management
+    std::string cache_dir;
+    bool cache_exists(const std::string& key, const std::string& integral);
+    GiNaC::ex load_from_cache(const std::string& key, const std::string& integral);
+    void save_to_cache(const std::string& key, const std::string& integral, const GiNaC::ex& coefficient);
+
+    // subprocess management
+    int max_subprocesses;
+    int working_subprocesses;
+    std::map<pid_t, std::pair<std::string, std::string>> subprocess_map;
+    void subprocess_work(const std::string& key, const std::string& integral, const std::string& coefficient);
+    void mainprocess_work(const std::string& key, const std::string& integral);
+    void subprocess_yield(bool always_wait);
 
     GiNaC::ex get(GiNaC::symtab& _table, const std::string& _key,
                   const std::string& _prefix = "", 

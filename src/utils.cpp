@@ -3,6 +3,36 @@
 #endif // NO_GSL
 #include "utils.hpp"
 
+std::pair<bool, GiNaC::ex> get_prefactor(const std::string& id, int t, int L,
+                                         const GiNaC::ex& d,
+                                         bool sector_designate,
+                                         std::size_t top_level_sector) {
+    auto indices = split(id.c_str());
+    int len = indices.size();
+    int total_a = 0;
+    GiNaC::ex prefactor = 1;
+    bool fail = false;
+    for (int i = 0; i < len; i++) {
+        if (sector_designate && !(top_level_sector & (1 << i)))
+            continue;
+        if (indices[i] <= 0) {
+            fail = true;
+            break;
+        }
+        prefactor *= GiNaC::tgamma(indices[i]);
+        total_a += indices[i];
+    }
+    if (total_a < t)
+        fail = true;
+    if (fail)
+        return std::make_pair(false, 1);
+    
+    for (int i = t; i < total_a; i++) {
+        prefactor /= (i - d * L / 2);
+    }
+    return std::make_pair(true, prefactor);
+}
+
 std::vector<int> split(const char* str) {
     std::vector<int> nums;
     const char* ptr = str;

@@ -26,6 +26,8 @@ endif
 OBJS      = ${OBJDIR}/config.o \
 			${OBJDIR}/utils.o \
 			${OBJDIR}/ibp.o \
+			${OBJDIR}/cache.o \
+			${OBJDIR}/subprocess.o \
 			${OBJDIR}/parse.o \
 			${OBJDIR}/generate.o \
 			${OBJDIR}/sdpa.o \

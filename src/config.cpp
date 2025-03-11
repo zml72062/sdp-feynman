@@ -15,6 +15,14 @@ config_parser::config_parser(const char* _config_file_name) {
     t = config_file["t"].as<int>();
     d0 = config_file["d0"].as<int>();
     eps_order = config_file["eps_order"].as<int>();
+    if (has_non_null_key(config_file, "subprocesses"))
+        max_subprocesses = config_file["subprocesses"].as<int>();
+    else
+        max_subprocesses = 1;
+    working_subprocesses = 0;
+    cache_dir = std::filesystem::path("tmp").append(integral_family);
+    std::filesystem::create_directory("tmp");
+    std::filesystem::create_directory(cache_dir);
 
     will_check_euclidean = true;
     will_dump_raw_ibps = false;

@@ -22,6 +22,11 @@ double to_double(const GiNaC::ex& ex);
 
 GiNaC::matrix adjugate(const GiNaC::matrix& M);
 
+std::pair<bool, GiNaC::ex> get_prefactor(const std::string& id, int t, int L,
+                                         const GiNaC::ex& d,
+                                         bool sector_designate,
+                                         std::size_t top_level_sector);
+
 #ifndef NO_GSL
 // randomly generate Feynman parameters (x_1, ..., x_n)
 // that are uniformly drawn from region 

@@ -55,6 +55,8 @@ ansatze:
   - [x0, 0, 5, 1]
   - [x1, 0, 5, 1]
   # - [x0, [1, x0, x1]]
+# maximum working subprocesses
+subprocesses: 16
 # options
 options:
   # check whether the kinematics lies in Euclidean region (default true)

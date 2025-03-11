@@ -2,44 +2,12 @@
 #include "utils.hpp"
 #include "config.hpp"
 
-static std::pair<bool, GiNaC::ex> get_prefactor(const std::string& id, int t, int L,
-                                                const GiNaC::ex& d,
-                                                bool sector_designate,
-                                                std::size_t top_level_sector) {
-    auto indices = split(id.c_str());
-    int len = indices.size();
-    int total_a = 0;
-    GiNaC::ex prefactor = 1;
-    bool fail = false;
-    for (int i = 0; i < len; i++) {
-        if (sector_designate && !(top_level_sector & (1 << i)))
-            continue;
-        if (indices[i] <= 0) {
-            fail = true;
-            break;
-        }
-        prefactor *= GiNaC::tgamma(indices[i]);
-        total_a += indices[i];
-    }
-    if (total_a < t)
-        fail = true;
-    if (fail)
-        return std::make_pair(false, 1);
-    
-    for (int i = t; i < total_a; i++) {
-        prefactor /= (i - d * L / 2);
-    }
-    return std::make_pair(true, prefactor);
-}
-
 void config_parser::read_ibps() {
     count_ibps();
     std::ifstream ibp_result_file(ibp_result_filename);
     std::string ibp, current_key;
     std::size_t _asterisk, counter = 0;
     bool fail = false;
-    GiNaC::ex pre_factor;
-    GiNaC::parser coefficient_reader(symbol_table);
     START_TIME(read_ibp);
     while (true) {
         ibp_result_file >> ibp;
@@ -50,24 +18,23 @@ void config_parser::read_ibps() {
                 fail = false;
                 counter++;
                 current_key = int_to_id(ibp);
-                auto output = get_prefactor(current_key, t, num_internals, symbol_table["d"],
-                                            sector_designate, top_level_sector);
-                fail = !output.first;
-                pre_factor = output.second;
+                fail = !get_prefactor(current_key, t, num_internals, symbol_table["d"],
+                                      sector_designate, top_level_sector).first;
                 if (fail)
                     continue;
                 get(integral_table, current_key, "I[", "]");
                 ibp_table[current_key] = 0;
                 std::cerr << "Processing the " << counter << "-th / " << ibp_count << " IBP relation" << "\r";
             } else if (!fail) { // an IBP body
-                auto current_integral = get(integral_table, int_to_id(ibp), "I[", "]")
-                    .subs(master_values, GiNaC::subs_options::algebraic)
-                    .subs(kinematics_numerics, GiNaC::subs_options::algebraic);
-                auto coefficient = coefficient_reader(ibp.substr(_asterisk + 1));
-                if (kinematics_numerics.nops() > 0) {
-                    coefficient = coefficient.subs(kinematics_numerics, GiNaC::subs_options::algebraic);
+                auto current_integral = int_to_id(ibp);
+                if (cache_exists(current_key, current_integral)) {
+                    mainprocess_work(current_key, current_integral);
+                } else {
+                    if (working_subprocesses == max_subprocesses) {
+                        subprocess_yield(false);
+                    }
+                    subprocess_work(current_key, current_integral, ibp.substr(_asterisk + 1));
                 }
-                ibp_table[current_key] += (current_integral * coefficient * pre_factor);
             }
         }
     }
@@ -82,6 +49,8 @@ void config_parser::read_ibps() {
             continue;
         ibp_table[master] = rhs_integral * output.second;
     }
+    while (working_subprocesses != 0)
+        subprocess_yield(true);
     END_TIME(read_ibp);
 
     std::cerr << std::endl << "Done!" << std::endl;
