@@ -21,6 +21,11 @@ void master_solver::solve_from(const std::vector<GiNaC::matrix>& matrices) {
     int num_blocks = matrices.size();
     int num_integrals = variables_to_solve.nops();
 
+    std::filesystem::create_directory("logs");
+    std::ofstream variables_out(std::filesystem::path("logs").append("variables_to_solve"));
+    variables_out << variables_to_solve << std::endl;
+    variables_out.close();
+
     std::vector<std::vector<GiNaC::matrix>> coefficients;
     std::vector<GiNaC::matrix> bias;
     GiNaC::lst zero_rules;

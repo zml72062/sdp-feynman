@@ -27,13 +27,13 @@ void config_parser::read_ibps() {
                 std::cerr << "Processing the " << counter << "-th / " << ibp_count << " IBP relation" << "\r";
             } else if (!fail) { // an IBP body
                 auto current_integral = int_to_id(ibp);
-                if (cache_exists(current_key, current_integral)) {
-                    mainprocess_work(current_key, current_integral);
+                if (read_cache_exists(current_key, current_integral)) {
+                    read_mainprocess_work(current_key, current_integral);
                 } else {
                     if (working_subprocesses == max_subprocesses) {
-                        subprocess_yield(false);
+                        read_subprocess_yield(false);
                     }
-                    subprocess_work(current_key, current_integral, ibp.substr(_asterisk + 1));
+                    read_subprocess_work(current_key, current_integral, ibp.substr(_asterisk + 1));
                 }
             }
         }
@@ -50,7 +50,7 @@ void config_parser::read_ibps() {
         ibp_table[master] = rhs_integral * output.second;
     }
     while (working_subprocesses != 0)
-        subprocess_yield(true);
+        read_subprocess_yield(true);
     END_TIME(read_ibp);
 
     std::cerr << std::endl << "Done!" << std::endl;
@@ -83,25 +83,17 @@ void config_parser::expand_ibps(int order) {
     int num_effective_ibps = ibp_table.size(), counter = 0;
     for (auto& key_value: ibp_table) {
         std::cerr << "Processing the " << ++counter << "-th / " << num_effective_ibps << " IBP relation" << "\r";
-        auto full = key_value.second.subs(rules, GiNaC::subs_options::algebraic);
-        GiNaC::lst derivatives;
-        int fail = 0;
-        for (int i = 0; i <= order; i++) {
-            try {
-                derivatives.append(full.subs(eps == 0, GiNaC::subs_options::algebraic));
-            } catch (GiNaC::pole_error& err) {
-                fail = 1;
-                break;
+        if (expand_cache_exists(key_value.first)) {
+            expand_mainprocess_work(key_value.first);
+        } else {
+            if (working_subprocesses == max_subprocesses) {
+                expand_subprocess_yield(false);
             }
-            if (i != order)
-                full = full.diff(eps);
-        }
-        if (fail)
-            continue;
-        for (int i = 0; i <= order; i++) {
-            numeric_ibp_table[i][key_value.first] = derivatives[i] / GiNaC::tgamma(i + 1);
+            expand_subprocess_work(key_value.first, key_value.second, rules, order, eps);
         }
     }
+    while (working_subprocesses != 0)
+        expand_subprocess_yield(true);
     END_TIME(expand_ibp);
     
     std::cerr << std::endl << "Done!" << std::endl;

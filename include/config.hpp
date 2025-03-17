@@ -123,17 +123,24 @@ private:
 
     // cache management
     std::string cache_dir;
-    bool cache_exists(const std::string& key, const std::string& integral);
-    GiNaC::ex load_from_cache(const std::string& key, const std::string& integral);
-    void save_to_cache(const std::string& key, const std::string& integral, const GiNaC::ex& coefficient);
+    bool read_cache_exists(const std::string& key, const std::string& integral);
+    GiNaC::ex load_from_read_cache(const std::string& key, const std::string& integral);
+    void save_to_read_cache(const std::string& key, const std::string& integral, const GiNaC::ex& coefficient);
+    bool expand_cache_exists(const std::string& key);
+    GiNaC::ex load_from_expand_cache(const std::string& key);
+    void save_to_expand_cache(const std::string& key, const GiNaC::ex& coefficient);
 
     // subprocess management
     int max_subprocesses;
     int working_subprocesses;
-    std::map<pid_t, std::pair<std::string, std::string>> subprocess_map;
-    void subprocess_work(const std::string& key, const std::string& integral, const std::string& coefficient);
-    void mainprocess_work(const std::string& key, const std::string& integral);
-    void subprocess_yield(bool always_wait);
+    std::map<pid_t, std::pair<std::string, std::string>> read_subprocess_map;
+    std::map<pid_t, std::string> expand_subprocess_map;
+    void read_subprocess_work(const std::string& key, const std::string& integral, const std::string& coefficient);
+    void read_mainprocess_work(const std::string& key, const std::string& integral);
+    void read_subprocess_yield(bool always_wait);
+    void expand_subprocess_work(const std::string& key, const GiNaC::ex& coefficient, const GiNaC::lst& rules, int order, const GiNaC::symbol& eps);
+    void expand_mainprocess_work(const std::string& key);
+    void expand_subprocess_yield(bool always_wait);
 
     GiNaC::ex get(GiNaC::symtab& _table, const std::string& _key,
                   const std::string& _prefix = "", 
