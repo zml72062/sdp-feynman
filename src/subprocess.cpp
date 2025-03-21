@@ -1,6 +1,7 @@
 #include "config.hpp"
 #include "utils.hpp"
 #include <sys/wait.h>
+#include <functional>
 
 void config_parser::read_subprocess_work(const std::string& key, const std::string& integral, const std::string& coefficient) {
     pid_t pid = fork();
@@ -24,20 +25,10 @@ void config_parser::read_mainprocess_work(const std::string& key, const std::str
         .subs(kinematics_numerics, GiNaC::subs_options::algebraic);
     auto prefactor = get_prefactor(key, t, num_internals, symbol_table["d"],
                                    sector_designate, top_level_sector).second;
-    auto coefficient = load_from_read_cache(key, integral);
-
-    auto key_indices = split(key.c_str());
-    auto integral_indices = split(integral.c_str());
-    int n_indices = key_indices.size();
-    int sum_diff = 0;
-    for (int i = 0; i < n_indices; i++) {
-        sum_diff += (key_indices[i] - integral_indices[i]);
-    }
-
-    ibp_table[key] += (current_integral * coefficient * prefactor * GiNaC::pow(-1, sum_diff));
+    ibp_table[key] += (current_integral * prefactor * read_ibp_simple(key, integral));
 }
 
-void config_parser::read_subprocess_yield(bool always_wait) {
+void config_parser::read_subprocess_yield(bool always_wait, const std::function<void(const std::string&, const std::string&)>& callback) {
     pid_t pid;
     int flag = always_wait ? 0 :
         ((working_subprocesses == max_subprocesses) ? 0 : WNOHANG);
@@ -45,7 +36,7 @@ void config_parser::read_subprocess_yield(bool always_wait) {
         working_subprocesses--;
         auto key_integral = read_subprocess_map[pid];
         auto key = key_integral.first, integral = key_integral.second;
-        read_mainprocess_work(key, integral);
+        callback(key, integral);
         read_subprocess_map.erase(pid);
         flag = always_wait ? 0 :
             ((working_subprocesses == max_subprocesses) ? 0 : WNOHANG);

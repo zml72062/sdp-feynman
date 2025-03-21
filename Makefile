@@ -29,6 +29,7 @@ OBJS      = ${OBJDIR}/config.o \
 			${OBJDIR}/cache.o \
 			${OBJDIR}/subprocess.o \
 			${OBJDIR}/parse.o \
+			${OBJDIR}/dimshift.o \
 			${OBJDIR}/generate.o \
 			${OBJDIR}/sdpa.o \
 			${OBJDIR}/solver.o \

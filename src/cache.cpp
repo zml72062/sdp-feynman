@@ -1,4 +1,5 @@
 #include "config.hpp"
+#include "utils.hpp"
 #include <fstream>
 #include <filesystem>
 
@@ -27,6 +28,18 @@ void config_parser::save_to_read_cache(const std::string& key, const std::string
                       std::ios::binary);
     out << ar;
     out.close();
+}
+
+GiNaC::ex config_parser::read_ibp_simple(const std::string& key, const std::string& integral) {
+    auto coefficient = load_from_read_cache(key, integral);
+    auto key_indices = split(key.c_str());
+    auto integral_indices = split(integral.c_str());
+    int n_indices = key_indices.size();
+    int sum_diff = 0;
+    for (int i = 0; i < n_indices; i++) {
+        sum_diff += (key_indices[i] - integral_indices[i]);
+    }
+    return coefficient * GiNaC::pow(-1, sum_diff);
 }
 
 bool config_parser::expand_cache_exists(const std::string& key) {

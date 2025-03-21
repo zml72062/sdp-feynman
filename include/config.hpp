@@ -34,6 +34,11 @@ public:
     void dump_raw_ibps(std::ostream& out);
     void dump_expanded_ibps(std::ostream& out);
 
+    // dimensional shifting relations and differential equations
+    GiNaC::matrix get_shift_to_upper_dim();
+    GiNaC::matrix get_shift_to_lower_dim();
+    GiNaC::matrix get_differential_equations();
+
     // Export internal data to a polynomial parser.
     polynomial_parser get_polynomial_parser() {
         return polynomial_parser(effective_master_table, 
@@ -126,6 +131,7 @@ private:
     bool read_cache_exists(const std::string& key, const std::string& integral);
     GiNaC::ex load_from_read_cache(const std::string& key, const std::string& integral);
     void save_to_read_cache(const std::string& key, const std::string& integral, const GiNaC::ex& coefficient);
+    GiNaC::ex read_ibp_simple(const std::string& key, const std::string& integral);
     bool expand_cache_exists(const std::string& key);
     GiNaC::ex load_from_expand_cache(const std::string& key);
     void save_to_expand_cache(const std::string& key, const GiNaC::ex& coefficient);
@@ -137,7 +143,7 @@ private:
     std::map<pid_t, std::string> expand_subprocess_map;
     void read_subprocess_work(const std::string& key, const std::string& integral, const std::string& coefficient);
     void read_mainprocess_work(const std::string& key, const std::string& integral);
-    void read_subprocess_yield(bool always_wait);
+    void read_subprocess_yield(bool always_wait, const std::function<void(const std::string&, const std::string&)>& callback);
     void expand_subprocess_work(const std::string& key, const GiNaC::ex& coefficient, const GiNaC::lst& rules, int order, const GiNaC::symbol& eps);
     void expand_mainprocess_work(const std::string& key);
     void expand_subprocess_yield(bool always_wait);

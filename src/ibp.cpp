@@ -31,7 +31,7 @@ void config_parser::read_ibps() {
                     read_mainprocess_work(current_key, current_integral);
                 } else {
                     if (working_subprocesses == max_subprocesses) {
-                        read_subprocess_yield(false);
+                        read_subprocess_yield(false, [this](auto k, auto i) { read_mainprocess_work(k, i); });
                     }
                     read_subprocess_work(current_key, current_integral, ibp.substr(_asterisk + 1));
                 }
@@ -50,7 +50,7 @@ void config_parser::read_ibps() {
         ibp_table[master] = rhs_integral * output.second;
     }
     while (working_subprocesses != 0)
-        read_subprocess_yield(true);
+        read_subprocess_yield(true, [this](auto k, auto i) { read_mainprocess_work(k, i); });
     END_TIME(read_ibp);
 
     std::cerr << std::endl << "Done!" << std::endl;
