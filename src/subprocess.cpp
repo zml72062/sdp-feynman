@@ -95,3 +95,40 @@ void config_parser::expand_subprocess_yield(bool always_wait) {
     }
 }
 
+void config_parser::generate_subprocess_work(int integral, int block, time_t timestamp, const GiNaC::matrix& raw_matrix, const GiNaC::lst& rules, const GiNaC::symbol& integral_symbol) {
+    pid_t pid = fork();
+    if (pid == 0) { // subprocess
+        if (integral != -1) // coefficient
+            save_to_generate_cache(integral, block, timestamp, GiNaC::ex_to<GiNaC::matrix>(raw_matrix.diff(integral_symbol).subs(rules, GiNaC::subs_options::algebraic)));
+        else // bias
+            save_to_generate_cache(integral, block, timestamp, GiNaC::ex_to<GiNaC::matrix>(((GiNaC::ex)raw_matrix).subs(rules, GiNaC::subs_options::algebraic)));
+        exit(0);
+    } else {
+        working_subprocesses++;
+        generate_subprocess_map[pid] = std::make_pair(integral, block);
+    }
+}
+
+void config_parser::generate_mainprocess_work(int integral, int block, time_t timestamp, std::vector<std::vector<GiNaC::matrix>>* coefficient, std::vector<GiNaC::matrix>* bias) {
+    if (integral == -1) { // bias
+        (*bias)[block] = load_from_generate_cache(integral, block, timestamp);
+    } else { // coefficient
+        (*coefficient)[integral][block] = load_from_generate_cache(integral, block, timestamp);
+    }
+}
+
+void config_parser::generate_subprocess_yield(bool always_wait, time_t timestamp, std::vector<std::vector<GiNaC::matrix>>* coefficient, std::vector<GiNaC::matrix>* bias) {
+    pid_t pid;
+    int flag = always_wait ? 0 :
+        ((working_subprocesses == max_subprocesses) ? 0 : WNOHANG);
+    while ((pid = waitpid(-1, 0, flag)) > 0) {
+        working_subprocesses--;
+        auto pair = generate_subprocess_map[pid];
+        int integral = pair.first, block = pair.second;
+        generate_mainprocess_work(integral, block, timestamp, coefficient, bias);
+        generate_subprocess_map.erase(pid);
+        flag = always_wait ? 0 :
+            ((working_subprocesses == max_subprocesses) ? 0 : WNOHANG);
+    }
+}
+

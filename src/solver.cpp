@@ -1,6 +1,8 @@
 #include "solver.hpp"
 #include "sdpa.hpp"
 #include "utils.hpp"
+#include "config.hpp"
+#include <time.h>
 #include <fstream>
 #include <filesystem>
 
@@ -15,11 +17,15 @@ static bool all_zero(const GiNaC::matrix& matrix) {
     return true;
 }
 
-void master_solver::solve_from(const std::vector<GiNaC::matrix>& matrices) {
+void master_solver::solve_from(const std::vector<GiNaC::matrix>& matrices, void* config_parserp) {
     START_TIME(solve);
     fail = false;
     int num_blocks = matrices.size();
     int num_integrals = variables_to_solve.nops();
+    config_parser* configurep = (config_parser*)config_parserp;
+    time_t now;
+    time(&now);
+    std::cerr << "Current time: " << now << std::endl;
 
     std::filesystem::create_directory("logs");
     std::ofstream variables_out(std::filesystem::path("logs").append("variables_to_solve"));
@@ -27,31 +33,48 @@ void master_solver::solve_from(const std::vector<GiNaC::matrix>& matrices) {
     variables_out.close();
 
     std::vector<std::vector<GiNaC::matrix>> coefficients;
-    std::vector<GiNaC::matrix> bias;
+    for (int i = 0; i < num_integrals; i++) {
+        coefficients.push_back(std::vector<GiNaC::matrix>(num_blocks));
+    }
+    std::vector<GiNaC::matrix> bias(num_blocks);
     GiNaC::lst zero_rules;
     for (auto& integral: variables_to_solve) {
         zero_rules.append(integral == 0);
     }
+
+    std::cerr << "Start generating SDP problem ..." << std::endl;
+    int total_matrices = (num_integrals + 1) * num_blocks, cnt = 0;
     for (int i = 0; i < num_integrals; i++) {
-        coefficients.push_back(std::vector<GiNaC::matrix>(num_blocks));
+        for (int j = 0; j < num_blocks; j++) {
+            if (configurep->working_subprocesses == configurep->max_subprocesses) {
+                configurep->generate_subprocess_yield(false, now, &coefficients, &bias);
+            }
+            std::cerr << "Processing " << ++cnt << "-th / " << total_matrices << " matrix" << "\r";
+            configurep->generate_subprocess_work(i, j, now, matrices[j], zero_rules, GiNaC::ex_to<GiNaC::symbol>(variables_to_solve[i]));
+        }
+    }
+    for (int j = 0; j < num_blocks; j++) {
+        if (configurep->working_subprocesses == configurep->max_subprocesses) {
+            configurep->generate_subprocess_yield(false, now, &coefficients, &bias);
+        }
+        std::cerr << "Processing " << ++cnt << "-th / " << total_matrices << " matrix" << "\r";
+        configurep->generate_subprocess_work(-1, j, now, matrices[j], zero_rules, GiNaC::symbol("#####placeholder#####"));
+    }
+    while (configurep->working_subprocesses != 0)
+        configurep->generate_subprocess_yield(true, now, &coefficients, &bias);
+
+    std::cerr << std::endl;
+
+    for (int i = 0; i < num_integrals; i++) {
         bool zero = true;
         for (int j = 0; j < num_blocks; j++) {
-            coefficients.back()[j] = GiNaC::ex_to<GiNaC::matrix>(
-                matrices[j].diff(GiNaC::ex_to<GiNaC::symbol>(variables_to_solve[i]))
-                           .subs(zero_rules, GiNaC::subs_options::algebraic)
-            );
-            zero &= all_zero(coefficients.back()[j]);
+            zero &= all_zero(coefficients[i][j]);
         }
         if (zero) {
             std::cerr << "Warning: " << variables_to_solve[i] << " cannot be determined" << std::endl;
         }
     }
-    for (int j = 0; j < num_blocks; j++) {
-        bias.push_back(GiNaC::ex_to<GiNaC::matrix>(
-            ((GiNaC::ex)matrices[j])
-                .subs(zero_rules, GiNaC::subs_options::algebraic)
-        ));
-    }
+    std::cerr << "Finished generating SDP problem!" << std::endl;
 
     // instantiate an SDPA solver
     sdpa_interface solve(coefficients, bias, *configp);

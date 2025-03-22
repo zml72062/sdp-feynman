@@ -72,3 +72,24 @@ void config_parser::save_to_expand_cache(const std::string& key, const GiNaC::ex
     out << ar;
     out.close();
 }
+
+GiNaC::matrix config_parser::load_from_generate_cache(int integral, int block, time_t timestamp) {
+    GiNaC::lst syms;
+    GiNaC::archive ar;
+    std::ifstream in(std::filesystem::path(cache_dir).append("generate")
+                     .append("cache_" + std::to_string(integral) + "_" + std::to_string(block) + "_" + std::to_string(timestamp)),
+                     std::ios::binary);
+    in >> ar;
+    in.close();
+    return GiNaC::ex_to<GiNaC::matrix>(ar.unarchive_ex(syms, "coeff"));
+}
+
+void config_parser::save_to_generate_cache(int integral, int block, time_t timestamp, const GiNaC::matrix& matrix) {
+    GiNaC::archive ar;
+    ar.archive_ex(matrix, "coeff");
+    std::ofstream out(std::filesystem::path(cache_dir).append("generate")
+                      .append("cache_" + std::to_string(integral) + "_" + std::to_string(block) + "_" + std::to_string(timestamp)),
+                      std::ios::binary);
+    out << ar;
+    out.close();
+}

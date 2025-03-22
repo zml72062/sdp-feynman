@@ -22,7 +22,7 @@ public:
         }
     }
     
-    void solve_from(const std::vector<GiNaC::matrix>& matrices);
+    void solve_from(const std::vector<GiNaC::matrix>& matrices, void* config_parserp);
     
 #ifndef NO_SDPA_LIB
     const GiNaC::lst& get_result() {

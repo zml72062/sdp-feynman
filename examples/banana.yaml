@@ -9,18 +9,14 @@ integralfamily:
   # kinematic invariants
   # format: - [variable, dimension]
   kinematic_invariants:
-    - [s, 2]
-    - [m1, 1]
-    - [m2, 1]
-    - [m3, 1]
-    - [m4, 1]
+    - [s, 0]
   # propagators
   # format: - [momentum, squared_mass]
   propagators:
-    - [l1, m1^2]
-    - [l2, m2^2]
-    - [l3, m3^2]
-    - [p+l1+l2+l3, m4^2]
+    - [l1, 2]
+    - [l2, 3/2]
+    - [l3, 4/3]
+    - [p+l1+l2+l3, 1]
     - [l1-l2, 0]
     - [l2-l3, 0]
     - [l3-l1, 0]
@@ -42,10 +38,6 @@ kiradir: /root/banana
 kirafile: kira_banana.m
 # numeric values for kinematic invariants
 kinematics_numerics:
-  - [m1, sqrt(2)]
-  - [m2, sqrt(3/2)]
-  - [m3, sqrt(4/3)]
-  - [m4, 1]
   - [s, 2]
 # target spacetime dimension
 d0: 2
@@ -59,10 +51,10 @@ eps_order: 2
 # known values for master integrals
 # format: - [[list of indices], expression]
 master_values:
-  - [[0, 2, 2, 2, 0, 0, 0, 0, 0], tgamma(2-d/2)^3*(m2*m3*m4)^(d-4)/tgamma(4-3*d/2)]
-  - [[2, 0, 2, 2, 0, 0, 0, 0, 0], tgamma(2-d/2)^3*(m1*m3*m4)^(d-4)/tgamma(4-3*d/2)]
-  - [[2, 2, 0, 2, 0, 0, 0, 0, 0], tgamma(2-d/2)^3*(m2*m1*m4)^(d-4)/tgamma(4-3*d/2)]
-  - [[2, 2, 2, 0, 0, 0, 0, 0, 0], tgamma(2-d/2)^3*(m2*m3*m1)^(d-4)/tgamma(4-3*d/2)]
+  - [[0, 2, 2, 2, 0, 0, 0, 0, 0], tgamma(2-d/2)^3*(sqrt(3/2)*sqrt(4/3))^(d-4)/tgamma(4-3*d/2)]
+  - [[2, 0, 2, 2, 0, 0, 0, 0, 0], tgamma(2-d/2)^3*(sqrt(2)*sqrt(4/3))^(d-4)/tgamma(4-3*d/2)]
+  - [[2, 2, 0, 2, 0, 0, 0, 0, 0], tgamma(2-d/2)^3*(sqrt(3/2)*sqrt(2))^(d-4)/tgamma(4-3*d/2)]
+  - [[2, 2, 2, 0, 0, 0, 0, 0, 0], tgamma(2-d/2)^3*(sqrt(3/2)*sqrt(4/3)*sqrt(2))^(d-4)/tgamma(4-3*d/2)]
 # custom parameters for SDPA
 sdpa_params:
   # maxIteration (unsigned int)

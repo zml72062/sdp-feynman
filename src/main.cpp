@@ -57,7 +57,7 @@ int main(int argc, char** argv) {
     }
 
     auto solver = configure.get_solver();
-    solver.solve_from(matrices);
+    solver.solve_from(matrices, &configure);
 
 #ifndef NO_SDPA_LIB
     if (solver.get_fail())

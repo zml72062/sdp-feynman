@@ -50,5 +50,6 @@ pre:
 .PHONY: clean
 clean:
 	rm -rf ${OBJDIR}
+	rm -rf tmp
 	rm -f master
 

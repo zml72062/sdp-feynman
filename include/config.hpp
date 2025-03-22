@@ -5,6 +5,7 @@
 #include <ginac/ginac.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <time.h>
 #include "parse.hpp"
 #include "solver.hpp"
 
@@ -72,6 +73,8 @@ public:
     bool will_dump_raw_ibps;
     bool will_dump_expanded_ibps;
     bool will_dump_symbolic_sdp;
+
+    friend class master_solver;
 private:
     YAML::Node config_file;
     // name of the family of integrals
@@ -135,18 +138,24 @@ private:
     bool expand_cache_exists(const std::string& key);
     GiNaC::ex load_from_expand_cache(const std::string& key);
     void save_to_expand_cache(const std::string& key, const GiNaC::ex& coefficient);
+    GiNaC::matrix load_from_generate_cache(int integral, int block, time_t timestamp);
+    void save_to_generate_cache(int integral, int block, time_t timestamp, const GiNaC::matrix& matrix);
 
     // subprocess management
     int max_subprocesses;
     int working_subprocesses;
     std::map<pid_t, std::pair<std::string, std::string>> read_subprocess_map;
     std::map<pid_t, std::string> expand_subprocess_map;
+    std::map<pid_t, std::pair<int, int>> generate_subprocess_map;
     void read_subprocess_work(const std::string& key, const std::string& integral, const std::string& coefficient);
     void read_mainprocess_work(const std::string& key, const std::string& integral);
     void read_subprocess_yield(bool always_wait, const std::function<void(const std::string&, const std::string&)>& callback);
     void expand_subprocess_work(const std::string& key, const GiNaC::ex& coefficient, const GiNaC::lst& rules, int order, const GiNaC::symbol& eps);
     void expand_mainprocess_work(const std::string& key);
     void expand_subprocess_yield(bool always_wait);
+    void generate_subprocess_work(int integral, int block, time_t timestamp, const GiNaC::matrix& raw_matrix, const GiNaC::lst& rules, const GiNaC::symbol& integral_symbol);
+    void generate_mainprocess_work(int integral, int block, time_t timestamp, std::vector<std::vector<GiNaC::matrix>>* coefficient, std::vector<GiNaC::matrix>* bias);
+    void generate_subprocess_yield(bool always_wait, time_t timestamp, std::vector<std::vector<GiNaC::matrix>>* coefficient, std::vector<GiNaC::matrix>* bias);
 
     GiNaC::ex get(GiNaC::symtab& _table, const std::string& _key,
                   const std::string& _prefix = "", 

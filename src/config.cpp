@@ -25,6 +25,7 @@ config_parser::config_parser(const char* _config_file_name) {
     std::filesystem::create_directory(cache_dir);
     std::filesystem::create_directory(std::filesystem::path(cache_dir).append("read"));
     std::filesystem::create_directory(std::filesystem::path(cache_dir).append("expand"));
+    std::filesystem::create_directory(std::filesystem::path(cache_dir).append("generate"));
 
     will_check_euclidean = true;
     will_dump_raw_ibps = false;
