@@ -8,6 +8,7 @@
 #include <time.h>
 #include "parse.hpp"
 #include "solver.hpp"
+#include "utils.hpp"
 
 
 class config_parser {
@@ -34,11 +35,12 @@ public:
     void expand_ibps();
     void dump_raw_ibps(std::ostream& out);
     void dump_expanded_ibps(std::ostream& out);
+    std::map<std::string, GiNaC::symtab> read_selected_ibps(const GiNaC::symtab& integrals);
 
     // dimensional shifting relations and differential equations
     GiNaC::matrix get_shift_to_upper_dim();
     GiNaC::matrix get_shift_to_lower_dim();
-    GiNaC::matrix get_differential_equations();
+    GiNaC::matrix get_differential_equations(const GiNaC::symbol& symbol);
 
     // Export internal data to a polynomial parser.
     polynomial_parser get_polynomial_parser() {
@@ -175,6 +177,31 @@ private:
     void put_raw_symbols(const std::vector<std::string>& _keys) {
         for (auto& key: _keys)
             get(symbol_table, key);
+    }
+
+    GiNaC::symtab poly_to_terms(const std::string& base_indices, const GiNaC::ex& polynomial, GiNaC::symtab* record) {
+        GiNaC::symtab result;
+        auto indices = split(base_indices.c_str());
+        auto termp = polynomial_iterator(polynomial), end = termp.end();
+        for (; termp != end; ++termp) {
+            std::vector<int> new_indices(feynman_params.nops(), 0);
+            GiNaC::ex term = *termp;
+            GiNaC::ex factor = 1;
+            for (auto& i: effective_feynman_params) {
+                int d = term.degree(feynman_params[i]);
+                new_indices[i] = indices[i] + d;
+                term = term.lcoeff(feynman_params[i]);
+                for (int j = 0; j < d; j++) {
+                    factor *= (indices[i] + j);
+                }
+            }
+            factor *= term;
+            auto repr = combine(new_indices);
+            result[repr] = factor;
+            if (record != nullptr)
+                (*record)[repr] = 0;
+        }
+        return result;
     }
 };
 
