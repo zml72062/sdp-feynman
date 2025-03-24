@@ -63,7 +63,9 @@ public:
     asy get_asy(const GiNaC::symbol& kinematic_symbol) {
         return asy(feynman_params,
                    effective_feynman_params,
-                   U(), F(), kinematic_symbol);
+                   U(), F(), kinematic_symbol,
+                   num_internals, d0, 
+                   GiNaC::ex_to<GiNaC::symbol>(symbol_table["d"]));
     }
 
     const GiNaC::symbol* get_diff_variablep() {

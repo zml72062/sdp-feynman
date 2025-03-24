@@ -2,47 +2,43 @@
 #define ASY_HPP
 
 #include <ginac/ginac.h>
-#include "utils.hpp"
 
 class asy {
 public:
     asy(const GiNaC::lst& feynman_params, 
         const std::vector<int>& effective_feynman_params,
         const GiNaC::ex& U, const GiNaC::ex& F,
-        const GiNaC::symbol& kinematic_symbol)
+        const GiNaC::symbol& kinematic_symbol, int L_, int d0_, 
+        const GiNaC::symbol& d)
     : feynman_paramsp(&feynman_params),
       effective_feynman_paramsp(&effective_feynman_params),
-      UF_product((U * F).expand()), xp(&kinematic_symbol) { }
+      U_poly(U), F_poly(F), L(L_), d0(d0_),
+      xp(&kinematic_symbol), dp(&d) { }
 
-    GiNaC::matrix export_to_python() {
-        std::vector<std::vector<int>> result;
-        auto termp = polynomial_iterator(UF_product), end = termp.end();
-        for (; termp != end; ++termp) {
-            result.push_back(std::vector<int>());
-            auto term = *termp;
-            for (auto& i: *effective_feynman_paramsp) {
-                result.back().push_back(term.degree((*feynman_paramsp)[i]));
-                term = term.lcoeff((*feynman_paramsp)[i]);
-            }
-            result.back().push_back(term.degree(*xp));
-        }
-        
-        if (result.size() == 0)
-            return GiNaC::matrix(0, 0);
-        
-        int row = result.size(), col = result[0].size();
-        GiNaC::matrix matrix(row, col);
-        for (int i = 0; i < row; i++)
-            for (int j = 0; j < col; j++)
-                matrix(i, j) = result[i][j];
-        return matrix;
+    void prepare(char* python_path) {
+        python_work(python_path);
+        compute_asymptotic_polys();
     }
+
+    void try_integrate_at_boundary(const std::string& integral);
 
 private:
     const GiNaC::lst* feynman_paramsp;
     const std::vector<int>* effective_feynman_paramsp;
-    GiNaC::ex UF_product;
+    GiNaC::ex U_poly;
+    GiNaC::ex F_poly;
+    int L;
+    int d0;
     const GiNaC::symbol* xp;
+    const GiNaC::symbol* dp;
+    GiNaC::matrix scaling_vectors;
+    GiNaC::lst asymptotic_Us;
+    GiNaC::lst asymptotic_Fs;
+
+    GiNaC::matrix get_term_orders(const GiNaC::ex& polynomial);
+    GiNaC::matrix export_to_python();
+    void python_work(char* python_path);
+    void compute_asymptotic_polys();
 };
 
 

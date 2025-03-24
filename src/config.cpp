@@ -195,10 +195,10 @@ void config_parser::compute_symanzik() {
     GiNaC::ex J = -denominator.subs(all_zero, GiNaC::subs_options::algebraic);
     GiNaC::matrix V(num_internals, 1);
     GiNaC::matrix M(num_internals, num_internals);
-    for (std::size_t i = 0; i < num_internals; i++) {
+    for (int i = 0; i < num_internals; i++) {
         GiNaC::ex deriv = denominator.diff(GiNaC::ex_to<GiNaC::symbol>(internal_symbols[i]));
         V(i, 0) = -deriv.subs(all_zero, GiNaC::subs_options::algebraic) / 2;
-        for (std::size_t j = 0; j < num_internals; j++) {
+        for (int j = 0; j < num_internals; j++) {
             M(i, j) = deriv.diff(GiNaC::ex_to<GiNaC::symbol>(internal_symbols[j])) / 2;
         }
     }

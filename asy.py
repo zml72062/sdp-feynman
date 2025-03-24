@@ -1,3 +1,4 @@
+import sys
 import sympy
 import scipy.spatial as sp
 from typing import Tuple, Any
@@ -64,6 +65,12 @@ def getvecs(points: sympy.Matrix) -> sympy.Matrix:
     return sympy.Matrix(list(vectors))
         
         
-def run(point_list: Any):
-    return getvecs(sympy.Matrix(point_list).T)
+def run(point_list_file: str):
+    with open(point_list_file) as f:
+        M = getvecs(sympy.Matrix(eval("".join(f.readlines()))).T)
+    print(M.rows, M.cols)
+    for i in range(M.rows):
+        print(*(M[i, j] for j in range(M.cols)))
 
+
+run(sys.argv[1])

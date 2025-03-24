@@ -13,7 +13,7 @@ ifeq (${NO_GSL}, true)
 CPPFLAGS  += -DNO_GSL
 endif
 
-CXXFLAGS  = -O2
+CXXFLAGS  = -O2 -Wall
 
 LDFLAGS   = -lyaml-cpp -lcln -lginac
 ifneq (${NO_SDPA_LIB}, true)
@@ -34,6 +34,7 @@ OBJS      = ${OBJDIR}/config.o \
 			${OBJDIR}/generate.o \
 			${OBJDIR}/sdpa.o \
 			${OBJDIR}/solver.o \
+			${OBJDIR}/asy.o \
 			${OBJDIR}/main.o
 
 all: pre master
@@ -52,5 +53,6 @@ pre:
 clean:
 	rm -rf ${OBJDIR}
 	rm -rf tmp
+	rm -rf __pycache__
 	rm -f master
 
