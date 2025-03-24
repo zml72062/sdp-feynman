@@ -1,0 +1,66 @@
+# integral family configuration
+integralfamily: 
+  # integral family name
+  name: banana
+  # loop momenta
+  internals: [l1, l2, l3]
+  # independent external momenta
+  externals: [p]
+  # kinematic invariants
+  # format: - [variable, dimension]
+  kinematic_invariants:
+    - [x, 0]
+  # propagators
+  # format: - [momentum, squared_mass]
+  propagators:
+    - [ l1, x ]
+    - [ l2, x ]
+    - [ l3, x ]
+    - [ p+l1+l2+l3, x ]
+    - [ l1-l2, 0 ]
+    - [ l2-l3, 0 ]
+    - [ l3-l1, 0 ]
+    - [ l1-p, 0 ]
+    - [ l2-p, 0 ]
+  # scalar product rules
+  # format: - [[momentum1, momentum2], expression]
+  # symbols in expression must be contained in kinematic invariants
+  scalarproduct_rules: 
+    - [[p, p], 1]
+  # [optional] top level sector
+  top_level_sector: 15
+# base directory of Kira reduction result
+#   - this directory should contain subdirectories
+#   - /config, /results and /sectormappings
+kiradir: /root/equalbanana
+# Kira reduction result file name
+#   - this file should be under ${kiradir}/results/${integralfamily}
+kirafile: kira_banana.m
+# numeric values for kinematic invariants
+kinematics_numerics: []
+# target spacetime dimension
+d0: 2
+# known values for master integrals
+# format: - [[list of indices], expression]
+master_values: []
+# custom parameters for SDPA
+sdpa_params:
+# polynomial ansatze
+# format: - [prefactor, min_x_degree, max_x_degree, max_log_degree]
+#      or - [prefactor, [terms]]
+ansatze: []
+# maximum working subprocesses
+subprocesses: 16
+# variable to differentiate over
+diff_variable: x
+# options
+options:
+  # check whether the kinematics lies in Euclidean region (default true)
+  check_euclidean: false
+  # dump raw IBP relations (default false)
+  dump_raw_ibps: false
+  # dump epsilon expansions of IBP relations (default false)
+  dump_expanded_ibps: false
+  # dump semidefinite programming problem in symbolic form (default false)
+  dump_symbolic_sdp: false
+

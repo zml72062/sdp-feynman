@@ -63,3 +63,5 @@ The "Instructions" sections are tested on Ubuntu 22.04 LTS.
         # To install SDPA callable libraries and examples,
         sudo apt-get install libsdpa-dev
         ```
+
+To run `asy.py`, one also needs to have Python 3 with `scipy` and `sympy` installed.

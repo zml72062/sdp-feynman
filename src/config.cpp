@@ -12,9 +12,18 @@ config_parser::config_parser(const char* _config_file_name) {
         .append("results")
         .append(integral_family)
         .append(config_file["kirafile"].as<std::string>());
-    t = config_file["t"].as<int>();
-    d0 = config_file["d0"].as<int>();
-    eps_order = config_file["eps_order"].as<int>();
+    if (has_non_null_key(config_file, "t"))
+        t = config_file["t"].as<int>();
+    else
+        t = 0;
+    if (has_non_null_key(config_file, "d0"))
+        d0 = config_file["d0"].as<int>();
+    else
+        d0 = 4;
+    if (has_non_null_key(config_file, "eps_order"))
+        eps_order = config_file["eps_order"].as<int>();
+    else
+        eps_order = 0;
     if (has_non_null_key(config_file, "subprocesses"))
         max_subprocesses = config_file["subprocesses"].as<int>();
     else
@@ -53,6 +62,11 @@ config_parser::config_parser(const char* _config_file_name) {
     read_masters();
     compute_symanzik();
     read_master_values();
+
+    if (has_non_null_key(config_file, "diff_variable"))
+        diff_variable = GiNaC::ex_to<GiNaC::symbol>(
+            symbol_table[config_file["diff_variable"].as<std::string>()]
+        );
 
     END_TIME(initialize);
     PRINT_TIME(initialize);

@@ -9,6 +9,7 @@
 #include "parse.hpp"
 #include "solver.hpp"
 #include "utils.hpp"
+#include "asy.hpp"
 
 
 class config_parser {
@@ -56,6 +57,20 @@ public:
         return master_solver(effective_master_table,
                              numeric_integral_table,
                              config_file, will_dump_symbolic_sdp);
+    }
+
+    // Export internal data to asy.
+    asy get_asy(const GiNaC::symbol& kinematic_symbol) {
+        return asy(feynman_params,
+                   effective_feynman_params,
+                   U(), F(), kinematic_symbol);
+    }
+
+    const GiNaC::symbol* get_diff_variablep() {
+        if (diff_variable.get_name().find("symbol") == 0)
+            return nullptr;
+        else
+            return &diff_variable;
     }
 
     const std::string& family_name() {
@@ -118,6 +133,7 @@ private:
     int num_internals;
     bool sector_designate;
     std::size_t top_level_sector;
+    GiNaC::symbol diff_variable;
 
     void read_internals();
     void read_externals();
