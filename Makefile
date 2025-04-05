@@ -13,7 +13,7 @@ ifeq (${NO_GSL}, true)
 CPPFLAGS  += -DNO_GSL
 endif
 
-CXXFLAGS  = -O2
+CXXFLAGS  = -O2 -Wall
 
 LDFLAGS   = -lyaml-cpp -lcln -lginac
 ifneq (${NO_SDPA_LIB}, true)

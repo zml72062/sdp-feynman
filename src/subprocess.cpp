@@ -72,7 +72,7 @@ void config_parser::expand_subprocess_work(const std::string& key, const GiNaC::
 
 void config_parser::expand_mainprocess_work(const std::string& key) {
     auto lst = GiNaC::ex_to<GiNaC::lst>(load_from_expand_cache(key));
-    auto order = lst.nops();
+    int order = lst.nops();
     if (order == 0)
         return;
     

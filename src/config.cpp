@@ -12,9 +12,18 @@ config_parser::config_parser(const char* _config_file_name) {
         .append("results")
         .append(integral_family)
         .append(config_file["kirafile"].as<std::string>());
-    t = config_file["t"].as<int>();
-    d0 = config_file["d0"].as<int>();
-    eps_order = config_file["eps_order"].as<int>();
+    if (has_non_null_key(config_file, "t"))
+        t = config_file["t"].as<int>();
+    else
+        t = 0;
+    if (has_non_null_key(config_file, "d0"))
+        d0 = config_file["d0"].as<int>();
+    else
+        d0 = 4;
+    if (has_non_null_key(config_file, "eps_order"))
+        eps_order = config_file["eps_order"].as<int>();
+    else
+        eps_order = 0;
     if (has_non_null_key(config_file, "subprocesses"))
         max_subprocesses = config_file["subprocesses"].as<int>();
     else
@@ -181,10 +190,10 @@ void config_parser::compute_symanzik() {
     GiNaC::ex J = -denominator.subs(all_zero, GiNaC::subs_options::algebraic);
     GiNaC::matrix V(num_internals, 1);
     GiNaC::matrix M(num_internals, num_internals);
-    for (std::size_t i = 0; i < num_internals; i++) {
+    for (int i = 0; i < num_internals; i++) {
         GiNaC::ex deriv = denominator.diff(GiNaC::ex_to<GiNaC::symbol>(internal_symbols[i]));
         V(i, 0) = -deriv.subs(all_zero, GiNaC::subs_options::algebraic) / 2;
-        for (std::size_t j = 0; j < num_internals; j++) {
+        for (int j = 0; j < num_internals; j++) {
             M(i, j) = deriv.diff(GiNaC::ex_to<GiNaC::symbol>(internal_symbols[j])) / 2;
         }
     }

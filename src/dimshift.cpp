@@ -5,13 +5,13 @@
 GiNaC::matrix config_parser::get_shift_to_upper_dim() {
     // map master integrals at dimension d-2 to linear combinations of
     // integrals at dimension d
-    std::map<std::string, std::map<std::string, GiNaC::ex>> collection;
+    std::map<std::string, GiNaC::symtab> collection;
     std::map<std::string, int> master_to_id;
     int id = 0;
     GiNaC::symtab expansion;
     for (auto& master: master_table) {
         master_to_id[master] = id++;
-        collection[master] = std::map<std::string, GiNaC::ex>();
+        collection[master] = GiNaC::symtab();
         auto indices = split(master.c_str());
         auto termp = polynomial_iterator(symanzik_U), end = termp.end();
         for (; termp != end; ++termp) {
@@ -36,7 +36,7 @@ GiNaC::matrix config_parser::get_shift_to_upper_dim() {
     // reduce integrals at dimension d to master integrals at dimension d
     std::ifstream ibp_result_file(ibp_result_filename);
     std::string ibp, current_key;
-    std::map<std::string, std::map<std::string, GiNaC::ex>> storage;
+    std::map<std::string, GiNaC::symtab> storage;
     std::size_t _asterisk;
     bool exist = false;
     while (true) {
@@ -48,7 +48,7 @@ GiNaC::matrix config_parser::get_shift_to_upper_dim() {
                 current_key = int_to_id(ibp);
                 exist = (expansion.find(current_key) != expansion.end());
                 if (exist)
-                    storage[current_key] = std::map<std::string, GiNaC::ex>();
+                    storage[current_key] = GiNaC::symtab();
             } else if (exist) { // an IBP body
                 auto current_integral = int_to_id(ibp);
                 if (read_cache_exists(current_key, current_integral)) {
@@ -67,7 +67,7 @@ GiNaC::matrix config_parser::get_shift_to_upper_dim() {
     }
     // add IBP entries for master integrals themselves
     for (auto& master: master_table) {
-        storage[master] = std::map<std::string, GiNaC::ex>();
+        storage[master] = GiNaC::symtab();
         storage[master][master] = 1;
     }
     while (working_subprocesses != 0)

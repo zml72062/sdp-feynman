@@ -63,3 +63,19 @@ The "Instructions" sections are tested on Ubuntu 22.04 LTS.
         # To install SDPA callable libraries and examples,
         sudo apt-get install libsdpa-dev
         ```
+
+## Reproducing Results 
+
+To reproduce the one-loop bubble integral results in [Feynman Integrals from Positivity Constraints](https://arxiv.org/pdf/2303.15624), namely equations (2.79), (2.103) and (2.107), compile and run 
+
+```sh
+./master examples/bubble.yaml
+```
+
+To reproduce the three-loop unequal-mass banana integral results, namely equations (3.35)~(3.37), compile and run
+
+```sh
+./master examples/banana.yaml
+```
+
+
