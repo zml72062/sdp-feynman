@@ -136,3 +136,49 @@ void config_parser::dump_expanded_ibps(std::ostream& out) {
     }
 }
 
+std::map<std::string, GiNaC::symtab> config_parser::read_selected_ibps(const GiNaC::symtab& integrals) {
+    std::ifstream ibp_result_file(ibp_result_filename);
+    std::string ibp, current_key;
+    std::map<std::string, GiNaC::symtab> storage;
+    std::size_t _asterisk;
+    bool exist = false;
+    while (true) {
+        ibp_result_file >> ibp;
+        if (ibp_result_file.eof())
+            break;
+        if (ibp.find(integral_family) != std::string::npos) {
+            if ((_asterisk = ibp.find('*')) == std::string::npos) { // an IBP head
+                current_key = int_to_id(ibp);
+                exist = (integrals.find(current_key) != integrals.end());
+                if (exist)
+                    storage[current_key] = GiNaC::symtab();
+            } else if (exist) { // an IBP body
+                auto current_integral = int_to_id(ibp);
+                if (read_cache_exists(current_key, current_integral)) {
+                    storage[current_key][current_integral] 
+                        = read_ibp_simple(current_key, current_integral);
+                } else {
+                    if (working_subprocesses == max_subprocesses) {
+                        read_subprocess_yield(false, [this, &storage](auto k, auto i) {
+                            storage[k][i] = read_ibp_simple(k, i);
+                        });
+                    }
+                    read_subprocess_work(current_key, current_integral, ibp.substr(_asterisk + 1));
+                }
+            }
+        }
+    }
+    // add IBP entries for master integrals themselves
+    for (auto& master: master_table) {
+        storage[master] = GiNaC::symtab();
+        storage[master][master] = 1;
+    }
+    while (working_subprocesses != 0)
+        read_subprocess_yield(true, [this, &storage](auto k, auto i) {
+            storage[k][i] = read_ibp_simple(k, i);
+        });
+    ibp_result_file.close();
+
+    return storage;
+}
+

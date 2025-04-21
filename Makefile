@@ -30,6 +30,7 @@ OBJS      = ${OBJDIR}/config.o \
 			${OBJDIR}/subprocess.o \
 			${OBJDIR}/parse.o \
 			${OBJDIR}/dimshift.o \
+			${OBJDIR}/diffeq.o \
 			${OBJDIR}/generate.o \
 			${OBJDIR}/sdpa.o \
 			${OBJDIR}/solver.o \

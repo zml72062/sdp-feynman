@@ -63,6 +63,11 @@ config_parser::config_parser(const char* _config_file_name) {
     compute_symanzik();
     read_master_values();
 
+    if (has_non_null_key(config_file, "diff_variable"))
+        diff_variable = GiNaC::ex_to<GiNaC::symbol>(
+            symbol_table[config_file["diff_variable"].as<std::string>()]
+        );
+
     END_TIME(initialize);
     PRINT_TIME(initialize);
 }
