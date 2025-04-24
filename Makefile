@@ -23,7 +23,7 @@ ifneq (${NO_GSL}, true)
 LDFLAGS   += -lgsl -lgslcblas
 endif
 
-OBJS      = ${OBJDIR}/config.o \
+LIBOBJS   = ${OBJDIR}/config.o \
 			${OBJDIR}/utils.o \
 			${OBJDIR}/ibp.o \
 			${OBJDIR}/cache.o \
@@ -33,10 +33,19 @@ OBJS      = ${OBJDIR}/config.o \
 			${OBJDIR}/diffeq.o \
 			${OBJDIR}/generate.o \
 			${OBJDIR}/sdpa.o \
-			${OBJDIR}/solver.o \
-			${OBJDIR}/main.o
+			${OBJDIR}/solver.o
+OBJS      = ${LIBOBJS} ${OBJDIR}/main.o
+UVOBJS    = ${LIBOBJS} ${OBJDIR}/uvexample.o
 
 all: pre master
+
+.PHONY: uv
+uv: pre additional_examples/bin/uvexample
+
+additional_examples/bin/uvexample: ${LIBOBJS} additional_examples/uvexample.cpp
+	mkdir -p additional_examples/bin
+	${CXX} ${CPPFLAGS} ${CXXFLAGS} -c -o ${OBJDIR}/uvexample.o additional_examples/uvexample.cpp
+	${CXX} ${UVOBJS} -o additional_examples/bin/uvexample ${LDFLAGS}
 
 master: ${OBJS}
 	${CXX} ${OBJS} -o master ${LDFLAGS}
@@ -53,4 +62,5 @@ clean:
 	rm -rf ${OBJDIR}
 	rm -rf tmp
 	rm -f master
+	rm -rf additional_examples/bin
 
