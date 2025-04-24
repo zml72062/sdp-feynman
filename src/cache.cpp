@@ -18,7 +18,7 @@ GiNaC::ex config_parser::load_from_read_cache(const std::string& key, const std:
                      std::ios::binary);
     in >> ar;
     in.close();
-    return ar.unarchive_ex(syms, "coeff");
+    return ar.unarchive_ex(syms, "coeff").subs(kinematics_numerics, GiNaC::subs_options::algebraic);
 }
 
 void config_parser::save_to_read_cache(const std::string& key, const std::string& integral, const GiNaC::ex& coefficient) {
@@ -55,13 +55,15 @@ GiNaC::ex config_parser::load_from_expand_cache(const std::string& key) {
             syms.append(numeric_integral_table[i][name]);
         }
     }
+    for (auto& symbol: symbol_table)
+        syms.append(symbol.second);
     
     GiNaC::archive ar;
     std::ifstream in(std::filesystem::path(cache_dir).append("expand").append("cache_" + key),
                      std::ios::binary);
     in >> ar;
     in.close();
-    return ar.unarchive_ex(syms, "coeff");
+    return ar.unarchive_ex(syms, "coeff").subs(kinematics_numerics, GiNaC::subs_options::algebraic);
 }
 
 void config_parser::save_to_expand_cache(const std::string& key, const GiNaC::ex& coefficient) {
