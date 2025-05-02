@@ -1,4 +1,5 @@
 NO_SDPA_LIB = false
+NO_GSL 		= false
 
 SRCDIR    = src
 INCDIR    = include
@@ -36,6 +37,7 @@ LIBOBJS   = ${OBJDIR}/config.o \
 			${OBJDIR}/solver.o
 OBJS      = ${LIBOBJS} ${OBJDIR}/main.o
 UVOBJS    = ${LIBOBJS} ${OBJDIR}/uvexample.o
+IROBJS    = ${LIBOBJS} ${OBJDIR}/irexample.o
 
 all: pre master
 
@@ -46,6 +48,14 @@ additional_examples/bin/uvexample: ${LIBOBJS} additional_examples/uvexample.cpp
 	mkdir -p additional_examples/bin
 	${CXX} ${CPPFLAGS} ${CXXFLAGS} -c -o ${OBJDIR}/uvexample.o additional_examples/uvexample.cpp
 	${CXX} ${UVOBJS} -o additional_examples/bin/uvexample ${LDFLAGS}
+
+.PHONY: ir
+ir: pre additional_examples/bin/irexample
+
+additional_examples/bin/irexample: ${LIBOBJS} additional_examples/irexample.cpp
+	mkdir -p additional_examples/bin
+	${CXX} ${CPPFLAGS} ${CXXFLAGS} -c -o ${OBJDIR}/irexample.o additional_examples/irexample.cpp
+	${CXX} ${IROBJS} -o additional_examples/bin/irexample ${LDFLAGS}
 
 master: ${OBJS}
 	${CXX} ${OBJS} -o master ${LDFLAGS}
